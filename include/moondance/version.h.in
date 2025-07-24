@@ -1,0 +1,9 @@
+/**
+ * Moondance version specification.
+ */
+#ifndef MD_VERSION_H
+#define MD_VERSION_H
+
+#define MD_VERSION "@MD_VERSION@"
+
+#endif // MD_VERSION_H
