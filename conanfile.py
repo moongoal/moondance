@@ -53,7 +53,6 @@ class Moondance(ConanFile):
         deps.generate()
 
     def build(self):
-        def_user_values = {}
         cmake = CMake(self)
 
         cmake.configure()
@@ -63,8 +62,8 @@ class Moondance(ConanFile):
     def package(self):
         copy(self, "**.h", path.join(self.source_folder, "include"), path.join(self.package_folder, "include"))
         copy(self, "**.h", path.join(self.build_folder, "include"), path.join(self.package_folder, "include"))
-        copy(self, "**.lib", path.join(self.build_folder), path.join(self.package_folder, "lib"))
-        copy(self, "**.pdb", path.join(self.build_folder), path.join(self.package_folder, "lib"))
+        copy(self, "**.lib", self.build_folder, path.join(self.package_folder, "lib"))
+        copy(self, "**.pdb", self.build_folder, path.join(self.package_folder, "lib"))
 
     def package_info(self):
-        self.cpp_info.libs = ["moondance.lib"]
+        self.cpp_info.libs = ["moondance"]
