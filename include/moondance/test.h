@@ -6,6 +6,8 @@
 #ifndef MD_TEST_H
 #define MD_TEST_H
 
+#include <moondance/util.h>
+
 #define MD_TEST_MAX_CASES (256u)
 #define MD_TEST_MAX_REPORTERS (16u)
 
