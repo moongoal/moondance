@@ -5,9 +5,9 @@
 
 #define MAX_MSG_BUF_LEN 1024
 
-md_test_result md_test_current_test_result;
+md_result md_current_test_result;
 
-static void on_test_startup(md_test_suite *const suite, md_test_case const *const tcase) {
+static void on_test_startup(md_suite *const suite, md_case const *const tcase) {
   for(unsigned i = 0; i < suite->reporter_count; ++i) {
     suite->reporters[i].on_case_startup(&suite->reporters[i], tcase->name);
   }
@@ -18,9 +18,9 @@ static void on_test_startup(md_test_suite *const suite, md_test_case const *cons
 }
 
 static void on_test_complete(
-    md_test_suite *const suite,
-    md_test_case const *const tcase,
-    md_test_result const result
+    md_suite *const suite,
+    md_case const *const tcase,
+    md_result const result
 ) {
   if(suite->each_cleanup) {
     suite->each_cleanup(tcase->user_ctx);
@@ -31,7 +31,7 @@ static void on_test_complete(
   }
 }
 
-static void on_suite_startup(md_test_suite *const suite) {
+static void on_suite_startup(md_suite *const suite) {
   for(unsigned i = 0; i < suite->reporter_count; ++i) {
     suite->reporters[i].on_suite_startup(&suite->reporters[i], suite);
   }
@@ -41,7 +41,7 @@ static void on_suite_startup(md_test_suite *const suite) {
   }
 }
 
-static void on_suite_complete(md_test_suite *const suite) {
+static void on_suite_complete(md_suite *const suite) {
   if(suite->suite_cleanup) {
     suite->suite_cleanup(suite);
   }
@@ -51,16 +51,16 @@ static void on_suite_complete(md_test_suite *const suite) {
   }
 }
 
-int md_test_run(int, char **, md_test_suite *const suite) {
+int md_run(int, char **, md_suite *const suite) {
   int failed_count = 0;
 
   on_suite_startup(suite);
 
   for(unsigned i = 0; i < suite->case_count; ++i) {
-    md_test_case const *const tcase = &suite->cases[i];
+    md_case const *const tcase = &suite->cases[i];
 
     on_test_startup(suite, tcase);
-    md_test_current_test_result = MD_TEST_RESULT_NOT_RUN;
+    md_current_test_result = MD_RESULT_NOT_RUN;
 
     if(!tcase->skip) {
       if(tcase->setup) {
@@ -73,17 +73,17 @@ int md_test_run(int, char **, md_test_suite *const suite) {
         tcase->cleanup(tcase->user_ctx);
       }
 
-      if(md_test_current_test_result == MD_TEST_RESULT_NOT_RUN) {
+      if(md_current_test_result == MD_RESULT_NOT_RUN) {
         // Test reached the end without failing - auto pass
-        md_test_current_test_result = MD_TEST_RESULT_PASSED;
+        md_current_test_result = MD_RESULT_PASSED;
       }
     } else {
-      md_test_current_test_result = MD_TEST_RESULT_SKIPPED;
+      md_current_test_result = MD_RESULT_SKIPPED;
     }
 
-    failed_count += (md_test_current_test_result == MD_TEST_RESULT_FAILED);
+    failed_count += (md_current_test_result == MD_RESULT_FAILED);
 
-    on_test_complete(suite, tcase, md_test_current_test_result);
+    on_test_complete(suite, tcase, md_current_test_result);
   }
 
   on_suite_complete(suite);
@@ -92,10 +92,10 @@ int md_test_run(int, char **, md_test_suite *const suite) {
 }
 
 static void console_result_reporter_on_suite_startup(
-    md_test_reporter *const reporter,
-    md_test_suite const *const
+    md_reporter *const reporter,
+    md_suite const *const
 ) {
-  md_test_console_result_reporter *const data = malloc(sizeof(md_test_console_result_reporter));
+  md_console_result_reporter *const data = malloc(sizeof(md_console_result_reporter));
 
   data->passed_test_count = 0;
   data->failed_test_count = 0;
@@ -105,10 +105,10 @@ static void console_result_reporter_on_suite_startup(
 }
 
 static void console_result_reporter_on_suite_complete(
-    md_test_reporter *const reporter,
-    md_test_suite const *const
+    md_reporter *const reporter,
+    md_suite const *const
 ) {
-  md_test_console_result_reporter *const data = reporter->data;
+  md_console_result_reporter *const data = reporter->data;
 
   int const test_count
       = (data->passed_test_count + data->failed_test_count + data->skipped_test_count);
@@ -126,34 +126,34 @@ static void console_result_reporter_on_suite_complete(
 }
 
 static void
-console_result_reporter_on_case_startup(md_test_reporter *const, char const *const name) {
+console_result_reporter_on_case_startup(md_reporter *const, char const *const name) {
   fputs(name, stderr);
 }
 
 static void console_result_reporter_on_case_complete(
-    md_test_reporter *const reporter,
+    md_reporter *const reporter,
     char const *const,
-    md_test_result const result
+    md_result const result
 ) {
   char result_text[MAX_MSG_BUF_LEN];
-  md_test_console_result_reporter *const data = reporter->data;
+  md_console_result_reporter *const data = reporter->data;
 
   switch(result) {
-    case MD_TEST_RESULT_NOT_RUN: // Should never happen
+    case MD_RESULT_NOT_RUN: // Should never happen
       strcpy_s(result_text, sizeof(char) * MAX_MSG_BUF_LEN, "-NOT RUN-");
       break;
 
-    case MD_TEST_RESULT_PASSED:
+    case MD_RESULT_PASSED:
       strcpy_s(result_text, sizeof(char) * MAX_MSG_BUF_LEN, "PASS");
       data->passed_test_count++;
       break;
 
-    case MD_TEST_RESULT_FAILED:
+    case MD_RESULT_FAILED:
       strcpy_s(result_text, sizeof(char) * MAX_MSG_BUF_LEN, "***FAIL***");
       data->failed_test_count++;
       break;
 
-    case MD_TEST_RESULT_SKIPPED:
+    case MD_RESULT_SKIPPED:
       strcpy_s(result_text, sizeof(char) * MAX_MSG_BUF_LEN, "-SKIP-");
       data->skipped_test_count++;
       break;
@@ -162,9 +162,9 @@ static void console_result_reporter_on_case_complete(
   fprintf(stderr, " [%s]\n", result_text);
 }
 
-md_test_suite md_test_suite_create() {
-  return (md_test_suite){.cases = {0},
-                         .reporters = {md_test_console_result_reporter_create(), {0}},
+md_suite md_suite_create() {
+  return (md_suite){.cases = {0},
+                         .reporters = {md_console_result_reporter_create(), {0}},
                          .each_setup = NULL,
                          .each_cleanup = NULL,
                          .suite_setup = NULL,
@@ -173,19 +173,19 @@ md_test_suite md_test_suite_create() {
                          .reporter_count = 1};
 }
 
-md_test_reporter md_test_console_result_reporter_create() {
-  return (md_test_reporter){.on_suite_startup = console_result_reporter_on_suite_startup,
+md_reporter md_console_result_reporter_create() {
+  return (md_reporter){.on_suite_startup = console_result_reporter_on_suite_startup,
                             .on_suite_complete = console_result_reporter_on_suite_complete,
                             .on_case_startup = console_result_reporter_on_case_startup,
                             .on_case_complete = console_result_reporter_on_case_complete,
                             .data = NULL};
 }
 
-md_test_case *
-md_test_add_case(md_test_suite *const suite, char const *const name, md_test_function const test) {
-  return md_test_add_case2(
+md_case *
+md_add_case(md_suite *const suite, char const *const name, md_function const test) {
+  return md_add_case2(
       suite,
-      &(md_test_case){
+      &(md_case){
           name, // name
           test, // test
           NULL, // setup
@@ -196,15 +196,15 @@ md_test_add_case(md_test_suite *const suite, char const *const name, md_test_fun
   );
 }
 
-md_test_case *md_test_add_case2(md_test_suite *const suite, md_test_case *const tcase) {
+md_case *md_add_case2(md_suite *const suite, md_case *const tcase) {
   unsigned const index = suite->case_count++;
 
-  if(index > MD_TEST_MAX_CASES) {
+  if(index > MD_MAX_CASES) {
     fputs("Too many test cases.", stderr);
     abort();
   }
 
-  md_test_case *const suite_tcase = &suite->cases[index];
+  md_case *const suite_tcase = &suite->cases[index];
   *suite_tcase = *tcase;
 
   return suite_tcase;

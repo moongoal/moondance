@@ -3,13 +3,13 @@
  *
  * Test framework.
  */
-#ifndef MD_TEST_H
-#define MD_TEST_H
+#ifndef MD_H
+#define MD_H
 
 #include <moondance/util.h>
 
-#define MD_TEST_MAX_CASES (256u)
-#define MD_TEST_MAX_REPORTERS (16u)
+#define MD_MAX_CASES (256u)
+#define MD_MAX_REPORTERS (16u)
 
 #define MDNODISCARD [[nodiscard]]
 
@@ -18,7 +18,7 @@
  *
  * @param case_name The name of the test case.
  */
-#define MD_TEST_CASE(case_name) static void case_name(void *)
+#define MD_CASE(case_name) static void case_name(void *)
 
 /**
  * Define a test case function prototype with context.
@@ -26,94 +26,94 @@
  * @param case_name The name of the test case.
  * @param ctx_name The name of the context object pointer.
  */
-#define MD_TEST_CASE_WC2(case_name, ctx_name) static void case_name(void *const ctx_name)
+#define MD_CASE_WC2(case_name, ctx_name) static void case_name(void *const ctx_name)
 
 /**
  * Define a test case function prototype with context.
  *
  * @param case_name The name of the test case.
  */
-#define MD_TEST_CASE_WC(case_name) MD_TEST_CASE_WC2(case_name, ctx)
+#define MD_CASE_WC(case_name) MD_CASE_WC2(case_name, ctx)
 
-#define md_test_pass() \
+#define md_pass() \
   do { \
-    md_test_current_test_result = MD_TEST_RESULT_PASSED; \
+    md_current_test_result = MD_RESULT_PASSED; \
     return; \
   } while(false)
-#define md_test_fail() \
+#define md_fail() \
   do { \
-    md_test_current_test_result = MD_TEST_RESULT_FAILED; \
+    md_current_test_result = MD_RESULT_FAILED; \
     return; \
   } while(false)
-#define md_test_assert(cond) \
+#define md_assert(cond) \
   if(!(cond)) { \
-    md_test_fail(); \
+    md_fail(); \
     return; \
   }
-#define md_test_add(suite_ptr, case_fun) md_test_add_case(suite_ptr, MD_QUOTE(case_fun), case_fun)
+#define md_add(suite_ptr, case_fun) md_add_case(suite_ptr, MD_QUOTE(case_fun), case_fun)
 
-typedef struct md_test_suite md_test_suite;
-typedef struct md_test_reporter md_test_reporter;
+typedef struct md_suite md_suite;
+typedef struct md_reporter md_reporter;
 
 /**
  * The result of a test.
  */
 typedef enum {
-  MD_TEST_RESULT_NOT_RUN,
-  MD_TEST_RESULT_PASSED,
-  MD_TEST_RESULT_FAILED,
-  MD_TEST_RESULT_SKIPPED
-} md_test_result;
+  MD_RESULT_NOT_RUN,
+  MD_RESULT_PASSED,
+  MD_RESULT_FAILED,
+  MD_RESULT_SKIPPED
+} md_result;
 
 /**
  * @internal
  *
  * Result of the currently running test.
  */
-extern md_test_result md_test_current_test_result;
+extern md_result md_current_test_result;
 
 /**
  * The function prototype for a test case.
  */
-typedef void (*md_test_function)(void *const ctx);
+typedef void (*md_function)(void *const ctx);
 
 /**
  * Individual test setup.
  *
  * @param ctx The user-provided test context object.
  */
-typedef void (*md_test_local_setup)(void *const ctx);
+typedef void (*md_local_setup)(void *const ctx);
 
 /**
  * Individual test cleanup.
  *
  * @param ctx The user-provided test context object.
  */
-typedef void (*md_test_local_cleanup)(void *const ctx);
+typedef void (*md_local_cleanup)(void *const ctx);
 
 /**
  * Global individual test setup.
  */
-typedef void (*md_test_each_setup)(void *const ctx);
+typedef void (*md_each_setup)(void *const ctx);
 
 /**
  * Global individual test cleanup.
  */
-typedef void (*md_test_each_cleanup)(void *const ctx);
+typedef void (*md_each_cleanup)(void *const ctx);
 
 /**
  * Global test suite setup.
  *
  * @param suite The test suite.
  */
-typedef void (*md_test_suite_setup)(md_test_suite *const suite);
+typedef void (*md_suite_setup)(md_suite *const suite);
 
 /**
  * Global test suite cleanup.
  *
  * @param suite The test suite.
  */
-typedef void (*md_test_suite_cleanup)(md_test_suite *const suite);
+typedef void (*md_suite_cleanup)(md_suite *const suite);
 
 /**
  * @internal
@@ -129,17 +129,17 @@ typedef struct {
   /**
    * The test function.
    */
-  md_test_function test;
+  md_function test;
 
   /**
    * Test setup function.
    */
-  md_test_local_setup setup;
+  md_local_setup setup;
 
   /**
    * Test cleanup function.
    */
-  md_test_local_cleanup cleanup;
+  md_local_cleanup cleanup;
 
   /**
    * Pointer to the user-provided context object for this case.
@@ -152,7 +152,7 @@ typedef struct {
    * A value indicating whether the test must be skipped.
    */
   bool skip;
-} md_test_case;
+} md_case;
 
 /**
  * Called before a test is run.
@@ -160,8 +160,8 @@ typedef struct {
  * @param reporter The reporter object.
  * @param name The name of the starting test.
  */
-typedef void (*md_test_result_reporter_on_case_startup)(
-    md_test_reporter *const reporter,
+typedef void (*md_result_reporter_on_case_startup)(
+    md_reporter *const reporter,
     char const *const name
 );
 
@@ -172,10 +172,10 @@ typedef void (*md_test_result_reporter_on_case_startup)(
  * @param name The name of the completed test.
  * @param result The test result.
  */
-typedef void (*md_test_result_reporter_on_case_complete)(
-    md_test_reporter *const reporter,
+typedef void (*md_result_reporter_on_case_complete)(
+    md_reporter *const reporter,
     char const *const name,
-    md_test_result const result
+    md_result const result
 );
 
 /**
@@ -184,9 +184,9 @@ typedef void (*md_test_result_reporter_on_case_complete)(
  * @param reporter The reporter object.
  * @param suite The test suite about to run.
  */
-typedef void (*md_test_result_reporter_on_suite_startup)(
-    md_test_reporter *const reporter,
-    md_test_suite const *const suite
+typedef void (*md_result_reporter_on_suite_startup)(
+    md_reporter *const reporter,
+    md_suite const *const suite
 );
 
 /**
@@ -195,9 +195,9 @@ typedef void (*md_test_result_reporter_on_suite_startup)(
  * @param reporter The reporter object.
  * @param suite The completed test suite.
  */
-typedef void (*md_test_result_reporter_on_suite_complete)(
-    md_test_reporter *const reporter,
-    md_test_suite const *const suite
+typedef void (*md_result_reporter_on_suite_complete)(
+    md_reporter *const reporter,
+    md_suite const *const suite
 );
 
 /**
@@ -206,11 +206,11 @@ typedef void (*md_test_result_reporter_on_suite_complete)(
  * and is responsible for publishing this result according to its
  * own semantics.
  */
-struct md_test_reporter {
-  md_test_result_reporter_on_suite_startup on_suite_startup;
-  md_test_result_reporter_on_suite_complete on_suite_complete;
-  md_test_result_reporter_on_case_startup on_case_startup;
-  md_test_result_reporter_on_case_complete on_case_complete;
+struct md_reporter {
+  md_result_reporter_on_suite_startup on_suite_startup;
+  md_result_reporter_on_suite_complete on_suite_complete;
+  md_result_reporter_on_case_startup on_case_startup;
+  md_result_reporter_on_case_complete on_case_complete;
 
   /**
    * Test reporter data.
@@ -225,14 +225,14 @@ typedef struct {
   int passed_test_count;
   int failed_test_count;
   int skipped_test_count;
-} md_test_console_result_reporter;
+} md_console_result_reporter;
 
 /**
  * Create a new console result reporter.
  *
  * @return The new test reporter.
  */
-md_test_reporter md_test_console_result_reporter_create();
+md_reporter md_console_result_reporter_create();
 
 /**
  * A collection of related tests and reporters that can be
@@ -241,36 +241,36 @@ md_test_reporter md_test_console_result_reporter_create();
  * By default, a test suite has a console result reporter attached
  * upon creation.
  */
-struct md_test_suite {
+struct md_suite {
   /**
    * The test case instances.
    */
-  md_test_case cases[MD_TEST_MAX_CASES];
+  md_case cases[MD_MAX_CASES];
 
   /**
    * The test reporter instances.
    */
-  md_test_reporter reporters[MD_TEST_MAX_REPORTERS];
+  md_reporter reporters[MD_MAX_REPORTERS];
 
   /**
    * Setup function to run before each test.
    */
-  md_test_each_setup each_setup;
+  md_each_setup each_setup;
 
   /**
    * Cleanup function to run after each test.
    */
-  md_test_each_cleanup each_cleanup;
+  md_each_cleanup each_cleanup;
 
   /**
    * Setup function to run before all tests.
    */
-  md_test_suite_setup suite_setup;
+  md_suite_setup suite_setup;
 
   /**
    * Cleanup function to run after all tests.
    */
-  md_test_suite_cleanup suite_cleanup;
+  md_suite_cleanup suite_cleanup;
 
   /**
    * The number of registered test case instances.
@@ -296,7 +296,7 @@ struct md_test_suite {
  *
  * @return Output test suite object.
  */
-MDNODISCARD md_test_suite md_test_suite_create();
+MDNODISCARD md_suite md_suite_create();
 
 /**
  * Run a test suite.
@@ -307,7 +307,7 @@ MDNODISCARD md_test_suite md_test_suite_create();
  *
  * @return The number of failed tests.
  */
-int md_test_run(int argc, char **argv, md_test_suite *const suite);
+int md_run(int argc, char **argv, md_suite *const suite);
 
 /**
  * Add a new test reporter.
@@ -315,7 +315,7 @@ int md_test_run(int argc, char **argv, md_test_suite *const suite);
  * @param suite The suite to add the reporter to.
  * @param reporter The reporter to add.
  */
-void md_test_add_reporter(md_test_suite *const suite, md_test_reporter *const reporter);
+void md_add_reporter(md_suite *const suite, md_reporter *const reporter);
 
 /**
  * Add a new test case.
@@ -326,8 +326,8 @@ void md_test_add_reporter(md_test_suite *const suite, md_test_reporter *const re
  *
  * @return A pointer to the test case.
  */
-md_test_case *
-md_test_add_case(md_test_suite *const suite, char const *const name, md_test_function const test);
+md_case *
+md_add_case(md_suite *const suite, char const *const name, md_function const test);
 
 /**
  * Add a new test case.
@@ -337,7 +337,7 @@ md_test_add_case(md_test_suite *const suite, char const *const name, md_test_fun
  *
  * @return A pointer to the suite test case created by copying the template.
  */
-md_test_case *md_test_add_case2(md_test_suite *const suite, md_test_case *const tcase);
+md_case *md_add_case2(md_suite *const suite, md_case *const tcase);
 
-#endif // MD_TEST_H
+#endif // MD_H
 
