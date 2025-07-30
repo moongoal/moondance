@@ -62,8 +62,14 @@ class Moondance(ConanFile):
     def package(self):
         copy(self, "**.h", path.join(self.source_folder, "include"), path.join(self.package_folder, "include"))
         copy(self, "**.h", path.join(self.build_folder, "include"), path.join(self.package_folder, "include"))
-        copy(self, "**.lib", self.build_folder, path.join(self.package_folder, "lib"))
+        copy(self, self._libname("**"), self.build_folder, path.join(self.package_folder, "lib"))
         copy(self, "**.pdb", self.build_folder, path.join(self.package_folder, "lib"))
 
     def package_info(self):
         self.cpp_info.libs = ["moondance"]
+
+    def _libname(self, basename: str) -> str:
+        if self.settings.os == "Windows":
+            return f'{basename}.lib'
+        else:
+            return f'lib{basename}.a'

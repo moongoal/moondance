@@ -28,7 +28,13 @@ class TestPackageRecipe(ConanFile):
     def layout(self):
         cmake_layout(self)
 
+    def _exename(self, basename: str) -> str:
+        if self.settings.os == "Windows":
+            return f'{basename}.exe'
+        else:
+            return basename
+
     def test(self):
         if can_run(self):
-            cmd = os.path.join(self.cpp.build.bindir, "test_exe.exe")
+            cmd = os.path.join(self.cpp.build.bindir, self._exename("test_exe"))
             self.run(cmd, env="conanrun")
