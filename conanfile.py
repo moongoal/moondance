@@ -16,7 +16,7 @@ class Moondance(ConanFile):
     topics = "testing",
     url = "https://github.com/moongoal/moondance"
     package_type = "static-library"
-    version = "1.0.0"
+    version = "1.0.1"
 
     build_requires = (
         "cmake/[>=4.0]",
