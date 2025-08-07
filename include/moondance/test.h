@@ -18,7 +18,7 @@
  *
  * @param case_name The name of the test case.
  */
-#define MD_CASE(case_name) static void case_name(void *)
+#define MD_CASE(case_name) static void test_case_##case_name(void *)
 
 /**
  * Define a test case function prototype with context.
@@ -26,7 +26,7 @@
  * @param case_name The name of the test case.
  * @param ctx_name The name of the context object pointer.
  */
-#define MD_CASE_WC2(case_name, ctx_name) static void case_name(void *const ctx_name)
+#define MD_CASE_WC2(case_name, ctx_name) static void test_case_##case_name(void *const ctx_name)
 
 /**
  * Define a test case function prototype with context.
@@ -50,7 +50,8 @@
     md_fail(); \
     return; \
   }
-#define md_add(suite_ptr, case_fun) md_add_case(suite_ptr, MD_QUOTE(case_fun), case_fun)
+#define md_add(suite_ptr, case_fun) \
+  md_add_case(suite_ptr, MD_QUOTE(test_case_##case_fun), test_case_##case_fun)
 
 typedef struct md_suite md_suite;
 typedef struct md_reporter md_reporter;
@@ -326,8 +327,7 @@ void md_add_reporter(md_suite *const suite, md_reporter *const reporter);
  *
  * @return A pointer to the test case.
  */
-md_case *
-md_add_case(md_suite *const suite, char const *const name, md_function const test);
+md_case *md_add_case(md_suite *const suite, char const *const name, md_function const test);
 
 /**
  * Add a new test case.
