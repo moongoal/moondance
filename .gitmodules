@@ -1,3 +1,0 @@
-[submodule "premake-ninja"]
-	path = scripts/premake-ninja
-	url = https://github.com/jimon/premake-ninja
