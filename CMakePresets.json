@@ -35,5 +35,29 @@
       "configurePreset": "Debug",
       "generators": ["TXZ"]
     }
+  ],
+
+  "workflowPresets": [
+    {
+      "name": "DebugPackage",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "Debug"
+        },
+        {
+          "type": "build",
+          "name": "Debug"
+        },
+        {
+          "type": "test",
+          "name": "Debug"
+        },
+        {
+          "type": "package",
+          "name": "Debug"
+        }
+      ]
+    }
   ]
 }
