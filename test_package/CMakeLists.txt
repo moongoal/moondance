@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 4.0)
 
-project(MoonvTestPackage)
+project(MoondanceTestPackage)
 
 find_package(moondance REQUIRED)
 
