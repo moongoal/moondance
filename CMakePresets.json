@@ -1,0 +1,63 @@
+{
+  "version": 10,
+  "configurePresets": [
+    {
+      "name": "Debug",
+      "generator": "Ninja",
+      "binaryDir": "build/Debug",
+      "installDir": "dist/Debug",
+      "environment": {
+        "CC": "clang"
+      }
+    }
+  ],
+
+  "buildPresets": [
+    {
+      "name": "Debug",
+      "configurePreset": "Debug"
+    }
+  ],
+
+  "testPresets": [
+    {
+      "name": "Debug",
+      "configurePreset": "Debug",
+      "output": {
+        "outputOnFailure": true
+      }
+    }
+  ],
+
+  "packagePresets": [
+    {
+      "name": "Debug",
+      "configurePreset": "Debug",
+      "generators": ["TXZ"]
+    }
+  ],
+
+  "workflowPresets": [
+    {
+      "name": "DebugPackage",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "Debug"
+        },
+        {
+          "type": "build",
+          "name": "Debug"
+        },
+        {
+          "type": "test",
+          "name": "Debug"
+        },
+        {
+          "type": "package",
+          "name": "Debug"
+        }
+      ]
+    }
+  ]
+}

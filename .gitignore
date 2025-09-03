@@ -1,7 +1,7 @@
 build/
-full_deploy/
+dist/
 
 *#
 *~
 
-CMake*.json
+CMakeUserPresets.json
