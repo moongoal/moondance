@@ -8,6 +8,9 @@
       "installDir": "dist/Debug",
       "environment": {
         "CC": "clang"
+      },
+      "cacheVariables": {
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
       }
     }
   ],
