@@ -1,6 +1,6 @@
 # Moondance Testing Framework
 
-Moondance is a C89 testing framework.
+Moondance is a C99 testing framework.
 
 ## Coding Standards
 

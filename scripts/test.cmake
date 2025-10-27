@@ -1,5 +1,7 @@
 include_guard()
 
+include(scripts/target.cmake)
+
 function(md_add_test TEST_NAME TEST_SOURCE_FILE)
     set(OPTIONS "")
     set(KEYWORDS "")
@@ -13,14 +15,13 @@ function(md_add_test TEST_NAME TEST_SOURCE_FILE)
         "${MULTI_VALUE_KEYWORDS}"
     )
 
-    set(EXE_NAME ${TEST_NAME})
+    add_executable(${TEST_NAME} ${TEST_SOURCE_FILE})
+    md_configure_target(${TEST_NAME})
 
-    add_executable(${EXE_NAME} ${TEST_SOURCE_FILE})
-
-    target_link_libraries(${EXE_NAME} PUBLIC moondance)
+    target_link_libraries(${TEST_NAME} PUBLIC moondance)
 
     set_target_properties(
-        ${EXE_NAME}
+        ${TEST_NAME}
         PROPERTIES
             RUNTIME_OUTPUT_DIRECTORY test
     )
@@ -31,7 +32,7 @@ function(md_add_test TEST_NAME TEST_SOURCE_FILE)
 
     add_test(
         NAME ${TEST_NAME}
-        COMMAND ${EXE_NAME}
+        COMMAND ${TEST_NAME}
         ${ARG_CONFIGURATIONS}
     )
 endfunction()

@@ -14,19 +14,14 @@ set(CPACK_PACKAGE_VERSION_PATCH ${MD_VERSION_PATCH})
 set(CPACK_PACKAGE_DIRECTORY packages)
 include(CPack)
 
+set(C_STANDARD_REQUIRED ON)
+
 include(scripts/test.cmake)
 include(scripts/install.cmake)
+include(scripts/target.cmake)
 
 add_library(moondance STATIC src/test.c)
-
-target_compile_options(
-  moondance
-  PRIVATE 
-    "-Wall"
-    "-Werror"
-    "-Wextra"
-    "-pedantic"
-)
+md_configure_target(moondance)
 
 target_include_directories(
   moondance
@@ -35,8 +30,6 @@ target_include_directories(
     $<INSTALL_INTERFACE:include>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
 )
-
-target_compile_features(moondance PUBLIC c_std_90)
 
 configure_file(
   include/moondance/version.h.in
