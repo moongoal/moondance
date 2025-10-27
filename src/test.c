@@ -1,7 +1,7 @@
-#include <moondance/test.h>
-#include <moondance/util.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <moondance/test.h>
+#include <moondance/util.h>
 
 #define MAX_MSG_BUF_LEN 1024
 
@@ -17,15 +17,19 @@ static void on_test_startup(md_suite *const suite, md_case const *const tcase) {
   }
 }
 
-static void on_test_complete(md_suite *const suite, md_case const *const tcase,
-                             md_result const result) {
+static void on_test_complete(
+  md_suite *const suite, md_case const *const tcase,
+  md_result const result
+) {
   if (result != MD_RESULT_SKIPPED && suite->each_cleanup) {
     suite->each_cleanup(tcase->user_ctx);
   }
 
   for (unsigned i = 0; i < suite->reporter_count; ++i) {
-    suite->reporters[i].on_case_complete(&suite->reporters[i], tcase->name,
-                                         result);
+    suite->reporters[i].on_case_complete(
+      &suite->reporters[i], tcase->name,
+      result
+    );
   }
 }
 
@@ -49,7 +53,7 @@ static void on_suite_complete(md_suite *const suite) {
   }
 }
 
-int md_run(int, char **, md_suite *const suite) {
+int md_run(int argc MDUNUSED, char ** argv MDUNUSED, md_suite *const suite) {
   int failed_count = 0;
 
   on_suite_startup(suite);
@@ -72,7 +76,7 @@ int md_run(int, char **, md_suite *const suite) {
       }
 
       if (md_current_test_result == MD_RESULT_NOT_RUN) {
-        // Test reached the end without failing - auto pass
+        /* Test reached the end without failing - auto pass */
         md_current_test_result = MD_RESULT_PASSED;
       }
     } else {
@@ -89,11 +93,11 @@ int md_run(int, char **, md_suite *const suite) {
   return failed_count;
 }
 
-static void
-console_result_reporter_on_suite_startup(md_reporter *const reporter,
-                                         md_suite const *const) {
-  md_console_result_reporter *const data =
-      malloc(sizeof(md_console_result_reporter));
+static void console_result_reporter_on_suite_startup(
+  md_reporter *const reporter,
+  md_suite const *const suite MDUNUSED
+) {
+  md_console_result_reporter *const data = malloc(sizeof(md_console_result_reporter));
 
   data->passed_test_count = 0;
   data->failed_test_count = 0;
@@ -102,16 +106,23 @@ console_result_reporter_on_suite_startup(md_reporter *const reporter,
   reporter->data = data;
 }
 
-static void
-console_result_reporter_on_suite_complete(md_reporter *const reporter,
-                                          md_suite const *const) {
+static void console_result_reporter_on_suite_complete(
+  md_reporter *const reporter,
+  md_suite const *const suite MDUNUSED
+) {
   md_console_result_reporter *const data = reporter->data;
 
-  int const test_count = (data->passed_test_count + data->failed_test_count +
-                          data->skipped_test_count);
+  int const test_count = (
+    data->passed_test_count
+    + data->failed_test_count
+    + data->skipped_test_count
+  );
 
-  float const pass_ratio =
-      (test_count > 0 ? (float)data->passed_test_count / test_count : 1.0f);
+  float const pass_ratio = (
+    test_count > 0
+    ? (float)data->passed_test_count / test_count
+    : 1.0f
+  );
 
   fprintf(stderr, "Ratio: %.2f\n", pass_ratio);
   fprintf(stderr, "Passed:  %u\n", data->passed_test_count);
@@ -123,18 +134,23 @@ console_result_reporter_on_suite_complete(md_reporter *const reporter,
   reporter->data = NULL;
 }
 
-static void console_result_reporter_on_case_startup(md_reporter *const,
-                                                    char const *const name) {
+static void console_result_reporter_on_case_startup(
+  md_reporter *const reporter MDUNUSED,
+  char const *const name
+) {
   fputs(name, stderr);
 }
 
 static void console_result_reporter_on_case_complete(
-    md_reporter *const reporter, char const *const, md_result const result) {
+  md_reporter *const reporter,
+  char const *const case_name MDUNUSED,
+  md_result const result
+) {
   char result_text[MAX_MSG_BUF_LEN];
   md_console_result_reporter *const data = reporter->data;
 
   switch (result) {
-  case MD_RESULT_NOT_RUN: // Should never happen
+  case MD_RESULT_NOT_RUN: /* Should never happen */
     strcpy_s(result_text, sizeof(char) * MAX_MSG_BUF_LEN, "-NOT RUN-");
     break;
 
@@ -157,37 +173,42 @@ static void console_result_reporter_on_case_complete(
   fprintf(stderr, " [%s]\n", result_text);
 }
 
-md_suite md_suite_create() {
-  return (md_suite){.cases = {0},
-                    .reporters = {md_console_result_reporter_create(), {0}},
-                    .each_setup = NULL,
-                    .each_cleanup = NULL,
-                    .suite_setup = NULL,
-                    .suite_cleanup = NULL,
-                    .case_count = 0,
-                    .reporter_count = 1};
+md_suite md_suite_create(void) {
+  return (md_suite){
+    .cases = {0},
+    .reporters = {md_console_result_reporter_create(), {0}},
+    .each_setup = NULL,
+    .each_cleanup = NULL,
+    .suite_setup = NULL,
+    .suite_cleanup = NULL,
+    .case_count = 0,
+    .reporter_count = 1
+  };
 }
 
-md_reporter md_console_result_reporter_create() {
+md_reporter md_console_result_reporter_create(void) {
   return (md_reporter){
-      .on_suite_startup = console_result_reporter_on_suite_startup,
-      .on_suite_complete = console_result_reporter_on_suite_complete,
-      .on_case_startup = console_result_reporter_on_case_startup,
-      .on_case_complete = console_result_reporter_on_case_complete,
-      .data = NULL};
+    .on_suite_startup = console_result_reporter_on_suite_startup,
+    .on_suite_complete = console_result_reporter_on_suite_complete,
+    .on_case_startup = console_result_reporter_on_case_startup,
+    .on_case_complete = console_result_reporter_on_case_complete,
+    .data = NULL
+  };
 }
 
-md_case *md_add_case(md_suite *const suite, char const *const name,
-                     md_function const test) {
+md_case *md_add_case(
+  md_suite *const suite, char const *const name,
+  md_function const test
+) {
   return md_add_case2(suite,
-                      &(md_case){
-                          name,            // name
-                          test,            // test
-                          NULL,            // setup
-                          NULL,            // cleanup
-                          suite->user_ctx, // user_ctx
-                          false            // skip
-                      });
+    &(md_case){
+      name,            /* name */
+      test,            /* test */
+      NULL,            /* setup */
+      NULL,            /* cleanup */
+      suite->user_ctx, /* user_ctx */
+      MD_FALSE            /* skip */
+    });
 }
 
 md_case *md_add_case2(md_suite *const suite, md_case *const tcase) {

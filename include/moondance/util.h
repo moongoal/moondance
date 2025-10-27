@@ -8,10 +8,10 @@
 
 #ifndef _WIN32
   #define strcpy_s(output, length, value) strcpy(output, value)
-#endif // _WIN32
+#endif /* _WIN32 */
 
 #define MD_QUOTE(x) MD_QUOTE_(x)
 #define MD_QUOTE_(x) #x
 
-#endif // MD_UTIL_H
+#endif /* MD_UTIL_H */
 

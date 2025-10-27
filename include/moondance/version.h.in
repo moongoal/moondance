@@ -6,4 +6,4 @@
 
 #define MD_VERSION "@MD_VERSION@"
 
-#endif // MD_VERSION_H
+#endif /* MD_VERSION_H */

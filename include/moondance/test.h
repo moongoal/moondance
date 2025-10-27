@@ -11,14 +11,19 @@
 #define MD_MAX_CASES (256u)
 #define MD_MAX_REPORTERS (16u)
 
-#define MDNODISCARD [[nodiscard]]
+#define MDNODISCARD __attribute__((warn_unused_result))
+#define MDUNUSED __attribute__((unused))
+
+#define MD_BOOL unsigned
+#define MD_TRUE ((MD_BOOL)1u)
+#define MD_FALSE ((MD_BOOL)0u)
 
 /**
  * Define a test case function prototype.
  *
  * @param case_name The name of the test case.
  */
-#define MD_CASE(case_name) static void test_case_##case_name(void *)
+#define MD_CASE(case_name) static void test_case_##case_name(void *ctx_ MDUNUSED)
 
 /**
  * Define a test case function prototype with context.
@@ -39,12 +44,12 @@
   do { \
     md_current_test_result = MD_RESULT_PASSED; \
     return; \
-  } while(false)
+  } while(MD_FALSE)
 #define md_fail() \
   do { \
     md_current_test_result = MD_RESULT_FAILED; \
     return; \
-  } while(false)
+  } while(MD_FALSE)
 #define md_assert(cond) \
   if(!(cond)) { \
     md_fail(); \
@@ -152,7 +157,7 @@ typedef struct {
   /**
    * A value indicating whether the test must be skipped.
    */
-  bool skip;
+  MD_BOOL skip;
 } md_case;
 
 /**
@@ -233,7 +238,7 @@ typedef struct {
  *
  * @return The new test reporter.
  */
-md_reporter md_console_result_reporter_create();
+md_reporter md_console_result_reporter_create(void);
 
 /**
  * A collection of related tests and reporters that can be
@@ -297,7 +302,7 @@ struct md_suite {
  *
  * @return Output test suite object.
  */
-MDNODISCARD md_suite md_suite_create();
+MDNODISCARD md_suite md_suite_create(void);
 
 /**
  * Run a test suite.
@@ -339,5 +344,5 @@ md_case *md_add_case(md_suite *const suite, char const *const name, md_function 
  */
 md_case *md_add_case2(md_suite *const suite, md_case *const tcase);
 
-#endif // MD_H
+#endif /* MD_H */
 

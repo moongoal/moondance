@@ -1,6 +1,6 @@
 # Moondance Testing Framework
 
-Moondance is a C testing framework.
+Moondance is a C89 testing framework.
 
 ## Coding Standards
 
@@ -12,9 +12,9 @@ This project uses [Semantic Versioning 2.0](https://semver.org/spec/v2.0.0.html)
 
 Requirements:
 
-* CMake 3.31+
-* Ninja 1.12+
-* LLVM 20+
+* CMake
+* Ninja
+* LLVM
 
 ### Development Environment Configuration
 
@@ -47,3 +47,19 @@ cpack --preset Debug
 ```
 
 This will generate the configured packages into the build folder.
+
+## Sample Test
+
+```
+#include <moondance/test.h>
+
+MD_CASE(my_test) { md_assert(1 == 1); }
+
+int main(int argc, char **argv) {
+  md_suite suite = md_suite_create();
+
+  md_add(&suite, my_test);
+
+  return md_run(argc, argv, &suite);
+}
+```
