@@ -1,21 +1,11 @@
 cmake_minimum_required(VERSION 3.31)
 
-project(moondance)
+project(moondance VERSION 2.0.0)
 enable_testing()
-
-set(MD_VERSION_MAJOR 2)
-set(MD_VERSION_MINOR 0)
-set(MD_VERSION_PATCH 0)
-set(MD_VERSION "${MD_VERSION_MAJOR}.${MD_VERSION_MINOR}.${MD_VERSION_PATCH}")
-
-set(CPACK_PACKAGE_VERSION_MAJOR ${MD_VERSION_MAJOR})
-set(CPACK_PACKAGE_VERSION_MINOR ${MD_VERSION_MINOR})
-set(CPACK_PACKAGE_VERSION_PATCH ${MD_VERSION_PATCH})
-set(CPACK_PACKAGE_DIRECTORY packages)
-include(CPack)
 
 set(C_STANDARD_REQUIRED ON)
 
+include(CPack)
 include(scripts/test.cmake)
 include(scripts/install.cmake)
 include(scripts/target.cmake)
