@@ -5,3 +5,4 @@ dist/
 *~
 
 CMakeUserPresets.json
+project.vim
